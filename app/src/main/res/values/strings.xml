@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">StoryApp</string>
+    <string name="email_placeholder">Masukkan Email Anda</string>
+    <string name="password_placeholder">Masukkan Password Anda</string>
+    <string name="regsiterBt">Regsiter</string>
+    <string name="username_placeholder">Masukkan username Anda</string>
+    <string name="field_empty">Tidak boleh kosong</string>
+    <string name="logout">Logout</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="ini_nama">ini nama</string>
+    <string name="ini_tanggal">ini tanggal</string>
+    <string name="ini_deskirpsi">ini deskirpsi</string>
+    <string name="upload">Upload</string>
+    <string name="ceritakan_disini">Ceritakan Disini</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="selamat_datang">Selamat Datang</string>
+</resources>
