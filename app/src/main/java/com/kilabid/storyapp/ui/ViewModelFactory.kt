@@ -10,6 +10,7 @@ import com.kilabid.storyapp.ui.LoginPage.LoginViewModel
 import com.kilabid.storyapp.ui.MainPage.MainViewModel
 import com.kilabid.storyapp.ui.RegisterPage.RegisterViewModel
 import com.kilabid.storyapp.ui.UploadPage.UploadViewModel
+import com.kilabid.storyapp.ui.mapsPage.MapsViewModel
 
 class ViewModelFactory(private val repository: UserRepository) :
     ViewModelProvider.NewInstanceFactory() {
@@ -34,6 +35,9 @@ class ViewModelFactory(private val repository: UserRepository) :
 
             modelClass.isAssignableFrom(UploadViewModel::class.java) -> {
                 UploadViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(MapsViewModel::class.java) -> {
+                MapsViewModel(repository) as T
             }
 
             else -> throw IllegalArgumentException("Error unknown ViewModel class: " + modelClass.name)

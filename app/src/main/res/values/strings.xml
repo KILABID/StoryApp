@@ -16,4 +16,14 @@
     <string name="gallery">Gallery</string>
     <string name="camera">Camera</string>
     <string name="selamat_datang">Selamat Datang</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="map">Map</string>
+
+    <string name="normal_type">Normal</string>
+    <string name="satellite_type">Satellite</string>
+    <string name="terrain_type">Terrain</string>
+    <string name="hybrid_type">Hybrid</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="try_again">try again</string>
+    <string name="share_your_location">Share your location?</string>
 </resources>

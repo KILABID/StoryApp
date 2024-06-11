@@ -14,6 +14,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @FormUrlEncoded
@@ -31,8 +32,6 @@ interface ApiService {
         @Field("password") password: String,
     ): RegisterResponse
 
-    @GET("stories")
-    suspend fun getStories(): ListStoryResponse
 
     @GET("stories/{id}")
     suspend fun getDetailStories(
@@ -45,6 +44,18 @@ interface ApiService {
     suspend fun upload(
         @Part file: MultipartBody.Part,
         @Part("description") description: RequestBody,
+        @Part("lat") lat: RequestBody,
+        @Part("lon") lon: RequestBody
     ): UploadResponse
 
+    @GET("stories")
+    suspend fun getStoriesWithLocation(
+        @Query("location") location : Int = 1,
+    ): ListStoryResponse
+
+    @GET("stories")
+    suspend fun getStories(
+        @Query("page") page: Int = 1,
+        @Query("size") size: Int = 20
+    ): ListStoryResponse
 }

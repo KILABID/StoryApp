@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
@@ -18,6 +19,7 @@ import com.kilabid.storyapp.databinding.ActivityMainBinding
 import com.kilabid.storyapp.ui.LandingPage.LandingActivity
 import com.kilabid.storyapp.ui.UploadPage.UploadActivity
 import com.kilabid.storyapp.ui.ViewModelFactory
+import com.kilabid.storyapp.ui.mapsPage.MapsActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -25,7 +27,6 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -46,8 +47,6 @@ class MainActivity : AppCompatActivity() {
         }
         setupView()
         setupRecyclerView()
-        viewModel.listStory()
-
     }
 
     private fun setupView() {
@@ -74,21 +73,34 @@ class MainActivity : AppCompatActivity() {
                 showDialog()
                 true
             }
+            R.id.action_map -> {
+                startActivity(Intent(this, MapsActivity::class.java))
+                true
+            }
 
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun setupRecyclerView() {
-        listAdapter = ListAdapter(emptyList())
-        binding.rvStory.adapter = listAdapter
+        listAdapter = ListAdapter()
         binding.rvStory.layoutManager = LinearLayoutManager(this)
-        viewModel.listStory.observe(this) {
-            listAdapter.submitList(it)
+        binding.rvStory.adapter = listAdapter.withLoadStateFooter(
+            footer = RefreshAdapter {
+                listAdapter.retry()
+            }
+        )
+
+        showLoading(true)
+        viewModel.story.observe(this) { pagingData ->
+            listAdapter.submitData(lifecycle, pagingData)
+            showLoading(false)
         }
 
     }
-
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+    }
 
     private fun showDialog() {
         AlertDialog.Builder(this).apply {

@@ -1,6 +1,7 @@
 package com.kilabid.storyapp.di
 
 import android.content.Context
+import com.kilabid.storyapp.data.database.StoryDatabase
 import com.kilabid.storyapp.data.local.UserPreference
 import com.kilabid.storyapp.data.local.dataStore
 import com.kilabid.storyapp.data.remote.api.ApiConfig
@@ -13,6 +14,7 @@ object Injection {
         val pref = UserPreference.getInstance(context.dataStore)
         val user = runBlocking { pref.getSession().first() }
         val apiService = ApiConfig.getApiService(user.token)
-        return UserRepository.getInstance(pref, apiService)
+        val database = StoryDatabase.getDatabase(context)
+        return UserRepository.getInstance(pref, apiService, database)
     }
 }

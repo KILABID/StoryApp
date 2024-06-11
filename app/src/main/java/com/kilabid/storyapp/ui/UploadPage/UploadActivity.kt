@@ -1,6 +1,9 @@
 package com.kilabid.storyapp.ui.UploadPage
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +13,11 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.kilabid.storyapp.databinding.ActivityUploadBinding
 import com.kilabid.storyapp.di.ResultState
 import com.kilabid.storyapp.ui.MainPage.MainActivity
@@ -27,14 +34,41 @@ class UploadActivity : AppCompatActivity() {
         ViewModelFactory.getInstance(this)
     }
 
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUploadBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
         binding.galleryButton.setOnClickListener { gallery() }
         binding.cameraButton.setOnClickListener { camera() }
-        binding.uploadButton.setOnClickListener { uploadImg() }
+        binding.switchLocation.setOnCheckedChangeListener { _, checked ->
+            if (checked) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
+                        if (location != null) {
+                            val locLat = location.latitude
+                            val locLon = location.longitude
+                            toast("Location $locLat, $locLon")
+                            binding.uploadButton.setOnClickListener { uploadImg(locLat, locLon) }
+                        }
+                    }
+                } else {
+                    toast("Permission Denied")
+                }
+            } else {
+                toast("Upload Image Without Location")
+                binding.uploadButton.setOnClickListener { uploadImg(0.0, 0.0) }
+            }
+        }
     }
 
     private fun gallery() {
@@ -46,14 +80,15 @@ class UploadActivity : AppCompatActivity() {
         launchCamera.launch(imageUri!!)
     }
 
-    private fun uploadImg() {
+    private fun uploadImg(lat: Double, lon: Double) {
         imageUri?.let { uri ->
             val fileImage = UploadUtils.uriToFile(uri, this).reduceFileImage()
             Log.d("Image File", "showImg: ${fileImage.path}")
             val description = binding.edAddDescription.text.toString()
+            val latLng = LatLng(lat, lon)
 
             lifecycleScope.launch {
-                viewModel.uploadImg(fileImage, description).collect { result ->
+                viewModel.uploadImg(fileImage, description, lat, lon).collect { result ->
                     when (result) {
                         is ResultState.Loading -> {
                             loading(true)
@@ -62,6 +97,11 @@ class UploadActivity : AppCompatActivity() {
                         is ResultState.Success -> {
                             toast(result.data.message)
                             loading(false)
+                            if (latLng != LatLng(0.0,0.0)) {
+                                toast("Data Send With Location")
+                            } else {
+                                toast("Data Send Without Location")
+                            }
 
                             val intent = Intent(this@UploadActivity, MainActivity::class.java)
                             intent.flags =
